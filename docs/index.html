@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MofidEasySdk</title>
+  <meta name="description" content="A .NET client for adding, editing and deleting orders on the Mofid EasyTrader platform.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f6f7f9;
+      --surface: #ffffff;
+      --border: #e3e6eb;
+      --text: #1b1f24;
+      --text-muted: #5b6570;
+      --accent: #0b6e4f;
+      --accent-soft: #e5f3ee;
+      --warn: #9a5b00;
+      --warn-soft: #fdf3e2;
+      --danger: #b42318;
+      --code-bg: #f3f5f7;
+      --code-text: #1f2328;
+      --tok-keyword: #a626a4;
+      --tok-string: #0a7d32;
+      --tok-comment: #6e7781;
+      --tok-type: #b45309;
+      --tok-number: #0550ae;
+      --tok-title: #0550ae;
+      --shadow: 0 1px 2px rgba(16, 24, 40, .05);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f1216;
+        --bg-soft: #151a20;
+        --surface: #151a20;
+        --border: #262d36;
+        --text: #e6e9ed;
+        --text-muted: #9aa4af;
+        --accent: #3ecf9b;
+        --accent-soft: #10291f;
+        --warn: #f0b35b;
+        --warn-soft: #2a1f0f;
+        --danger: #f97066;
+        --code-bg: #12171d;
+        --code-text: #d7dde3;
+        --tok-keyword: #d19af5;
+        --tok-string: #8ddb8c;
+        --tok-comment: #7d8793;
+        --tok-type: #f2b36f;
+        --tok-number: #79c0ff;
+        --tok-title: #79c0ff;
+        --shadow: none;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f1216;
+      --bg-soft: #151a20;
+      --surface: #151a20;
+      --border: #262d36;
+      --text: #e6e9ed;
+      --text-muted: #9aa4af;
+      --accent: #3ecf9b;
+      --accent-soft: #10291f;
+      --warn: #f0b35b;
+      --warn-soft: #2a1f0f;
+      --danger: #f97066;
+      --code-bg: #12171d;
+      --code-text: #d7dde3;
+      --tok-keyword: #d19af5;
+      --tok-string: #8ddb8c;
+      --tok-comment: #7d8793;
+      --tok-type: #f2b36f;
+      --tok-number: #79c0ff;
+      --tok-title: #79c0ff;
+      --shadow: none;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.65 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; }
+    :not(pre) > code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: .08em .35em;
+      font-size: .86em;
+      overflow-wrap: anywhere;
+    }
+
+    /* Top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
+      max-width: 1160px; margin: 0 auto; padding: 12px 16px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .brand { font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+    .brand span { color: var(--accent); }
+    .topbar nav { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+    .topbar nav a, .icon-btn {
+      color: var(--text-muted); font-size: 14px; font-weight: 500;
+      padding: 6px 10px; border-radius: 8px;
+    }
+    .topbar nav a:hover, .icon-btn:hover { background: var(--bg-soft); color: var(--text); text-decoration: none; }
+    .icon-btn { background: none; border: 0; cursor: pointer; font: inherit; line-height: 1; }
+
+    /* Layout */
+    .layout {
+      max-width: 1160px; margin: 0 auto; padding: 0 16px;
+      display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 48px;
+    }
+    .toc {
+      position: sticky; top: 72px; align-self: start;
+      padding: 32px 0; font-size: 14px;
+      max-height: calc(100vh - 72px); overflow-y: auto;
+    }
+    .toc p { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+    .toc a { display: block; padding: 5px 10px; margin-left: -10px; border-radius: 6px; color: var(--text-muted); }
+    .toc a:hover { color: var(--text); background: var(--bg-soft); text-decoration: none; }
+    .toc a.active { color: var(--accent); background: var(--accent-soft); font-weight: 500; }
+    main { padding: 32px 0 96px; min-width: 0; }
+
+    /* Hero */
+    .hero { padding: 24px 0 8px; }
+    .hero h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.15; letter-spacing: -.025em; margin: 0 0 12px; }
+    .hero p.lead { font-size: 18px; color: var(--text-muted); max-width: 640px; margin: 0 0 20px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .pill {
+      font-size: 13px; font-weight: 500; padding: 4px 10px; border-radius: 999px;
+      background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-muted);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 15px;
+      border: 1px solid var(--border); color: var(--text); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .btn:hover { text-decoration: none; border-color: var(--text-muted); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+    .btn.primary:hover { filter: brightness(1.08); }
+
+    /* Content */
+    section { padding-top: 40px; }
+    h2 { font-size: 26px; letter-spacing: -.015em; margin: 0 0 12px; line-height: 1.25; }
+    h3 { font-size: 18px; margin: 28px 0 8px; }
+    p { margin: 0 0 14px; }
+    ol, ul { padding-left: 22px; margin: 0 0 14px; }
+    li { margin: 4px 0; }
+
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 28px 0 0; }
+    .feature { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--surface); box-shadow: var(--shadow); }
+    .feature strong { display: block; margin-bottom: 4px; }
+    .feature span { color: var(--text-muted); font-size: 14px; }
+
+    /* Code blocks */
+    .code {
+      position: relative; margin: 0 0 18px;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--code-bg); overflow: hidden;
+    }
+    .code-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 8px 6px 14px; border-bottom: 1px solid var(--border);
+      font-size: 12px; color: var(--text-muted); font-weight: 500;
+    }
+    .copy {
+      font: 500 12px "Inter", sans-serif; color: var(--text-muted); cursor: pointer;
+      background: none; border: 1px solid transparent; border-radius: 6px; padding: 3px 8px;
+    }
+    .copy:hover { border-color: var(--border); color: var(--text); }
+    pre { margin: 0; padding: 14px 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.6; color: var(--code-text); }
+    pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+    .hljs-keyword, .hljs-built_in, .hljs-literal { color: var(--tok-keyword); }
+    .hljs-string { color: var(--tok-string); }
+    .hljs-comment { color: var(--tok-comment); font-style: italic; }
+    .hljs-type, .hljs-class .hljs-title, .hljs-title.class_ { color: var(--tok-type); }
+    .hljs-number { color: var(--tok-number); }
+    .hljs-title, .hljs-title.function_ { color: var(--tok-title); }
+
+    /* Callouts */
+    .callout {
+      border: 1px solid var(--border); border-left: 4px solid var(--accent);
+      background: var(--accent-soft); border-radius: 10px; padding: 12px 16px; margin: 0 0 18px;
+    }
+    .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout strong:first-child { color: var(--text); }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; margin: 0 0 18px; border: 1px solid var(--border); border-radius: 12px; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { background: var(--bg-soft); font-weight: 600; font-size: 13px; color: var(--text-muted); }
+    tr:last-child td { border-bottom: 0; }
+    td code { white-space: nowrap; }
+    .yes { color: var(--accent); font-weight: 600; }
+    .unknown { color: var(--warn); font-weight: 600; }
+
+    /* Steps */
+    .steps { counter-reset: step; list-style: none; padding: 0; }
+    .steps li { position: relative; padding-left: 40px; margin: 0 0 12px; }
+    .steps li::before {
+      counter-increment: step; content: counter(step);
+      position: absolute; left: 0; top: 1px; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 13px;
+      display: grid; place-items: center;
+    }
+
+    footer { border-top: 1px solid var(--border); margin-top: 64px; padding-top: 24px; color: var(--text-muted); font-size: 14px; }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .toc { display: none; }
+      .topbar nav a.hide-sm { display: none; }
+      main { padding-top: 16px; }
+      section { padding-top: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">Mofid<span>Easy</span>Sdk</a>
+      <nav>
+        <a class="hide-sm" href="#quick-start">Docs</a>
+        <a class="hide-sm" href="https://github.com/alireza267/MofidEasySdk/blob/main/CONTRIBUTING.md">Contribute</a>
+        <a href="https://github.com/alireza267/MofidEasySdk">GitHub</a>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="toc" aria-label="On this page">
+      <p>On this page</p>
+      <a href="#install">Install</a>
+      <a href="#token">Get your token</a>
+      <a href="#quick-start">Quick start</a>
+      <a href="#rejections">Rejected orders</a>
+      <a href="#unknown-state">Timeouts</a>
+      <a href="#token-refresh">Replacing the token</a>
+      <a href="#di">Dependency injection</a>
+      <a href="#errors">Errors</a>
+      <a href="#options">Options</a>
+      <a href="#sample">Sample app</a>
+    </aside>
+
+    <main id="top">
+      <div class="hero">
+        <h1>Trade on EasyTrader from .NET</h1>
+        <p class="lead">MofidEasySdk adds, edits and deletes orders on <a href="https://d.easytrader.ir">d.easytrader.ir</a>. It takes care of request formats, the bearer token and error handling, so your code only deals with orders.</p>
+        <div class="pills">
+          <span class="pill">.NET 10</span>
+          <span class="pill">Async</span>
+          <span class="pill">Thread-safe</span>
+          <span class="pill">Dependency injection ready</span>
+        </div>
+        <div class="actions">
+          <a class="btn primary" href="#quick-start">Get started</a>
+          <a class="btn" href="https://github.com/alireza267/MofidEasySdk">View on GitHub</a>
+        </div>
+        <div class="features">
+          <div class="feature"><strong>Three calls</strong><span><code>AddOrderAsync</code>, <code>EditOrderAsync</code> and <code>DeleteOrderAsync</code>.</span></div>
+          <div class="feature"><strong>Typed rejections</strong><span>Every OMS error maps to an <code>OmsErrorKind</code> you can <code>switch</code> on.</span></div>
+          <div class="feature"><strong>Safe timeouts</strong><span>A timed-out request is reported as <em>unknown state</em>, never as a plain failure.</span></div>
+          <div class="feature"><strong>Token checks</strong><span>An expired JWT is caught before sending, with a clear message.</span></div>
+        </div>
+      </div>
+
+      <section id="install">
+        <h2>Install</h2>
+        <p>The package isn't on NuGet yet. Clone the repository and reference the project:</p>
+        <div class="code">
+          <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-plaintext">git clone https://github.com/alireza267/MofidEasySdk.git
+dotnet add reference MofidEasySdk/src/MofidEasySdk/MofidEasySdk.csproj</code></pre>
+        </div>
+        <p>Once it's published, this will be:</p>
+        <div class="code">
+          <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-plaintext">dotnet add package MofidEasySdk</code></pre>
+        </div>
+      </section>
+
+      <section id="token">
+        <h2>Get your access token</h2>
+        <p>The SDK uses the same token your browser uses. You pass it to the library yourself.</p>
+        <ol class="steps">
+          <li>Log in to <a href="https://d.easytrader.ir">d.easytrader.ir</a>.</li>
+          <li>Open DevTools (<kbd>F12</kbd>) → <strong>Network</strong>, and click any request to <code>api-mts.orbis.easytrader.ir</code>.</li>
+          <li>Copy the value of the <code>Authorization</code> header. With or without the <code>Bearer&nbsp;</code> prefix is fine.</li>
+        </ol>
+        <div class="callout warn">
+          <p><strong>Treat the token like a password.</strong> It can place orders on your account. Keep it out of source control and logs.</p>
+        </div>
+        <p>The token is a JWT and expires. The SDK reads its <code>exp</code> claim. Once it has expired, the SDK throws <code>EasyTraderAuthenticationException</code> without sending anything. Copy a fresh token when that happens.</p>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick start</h2>
+        <p>Create one client and reuse it. It's thread-safe and doesn't need disposing.</p>
+        <div class="code">
+          <div class="code-head"><span>C#</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-csharp">using MofidEasySdk;
+
+var client = new EasyTraderClient(token);
+
+// Add a buy order: 244 shares at 20,520 Rials
+OrderResponse added = await client.AddOrderAsync(new AddOrderRequest(
+    SymbolIsin: "IRO1TBAN0001",
+    Side: OrderSide.Buy,
+    Price: 20520,
+    Quantity: 244));
+
+Console.WriteLine($"Order placed: {added.Id}");
+
+// Edit it: the edit creates a NEW order with a NEW ID
+OrderResponse edited = await client.EditOrderAsync(new EditOrderRequest(
+    OrderId: added.Id,
+    SymbolIsin: "IRO1TBAN0001",
+    Price: 20520,
+    Quantity: 270));
+
+// Delete it: use the ID returned by the edit
+await client.DeleteOrderAsync(edited.Id);</code></pre>
+        </div>
+        <p>Each method returns an <code>OrderResponse</code> with the order's <code>Id</code> and the server's <code>Message</code>. A returned response always means the request was accepted, and <code>Id</code> is always set. Every other outcome throws an exception.</p>
+        <div class="callout">
+          <p><strong>Edits create a new order.</strong> Once an edit is booked, the old order is no longer in the matching engine. Always use <code>edited.Id</code> for the next edit or delete.</p>
+        </div>
+        <p>Orders are valid for the trading day (<code>OrderValidity.Day</code>). Other validity types aren't supported yet.</p>
+      </section>
+
+      <section id="rejections">
+        <h2>Handling rejected orders</h2>
+        <p>The OMS may create an order, assign it an ID, and then reject it. The server still answers HTTP 200, but with <code>isSuccessful: false</code>. The SDK turns that into <code>EasyTraderOrderException</code>:</p>
+        <div class="code">
+          <div class="code-head"><span>C#</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-csharp">try
+{
+    await client.AddOrderAsync(request);
+}
+catch (EasyTraderOrderException ex)
+{
+    // ex.OrderId: ID of the rejected order (it isn't live), or null
+    // ex.Error:   why it was rejected
+    switch (ex.Error?.Kind)
+    {
+        case OmsErrorKind.MoneyBalanceIsNotEnough:
+            Console.WriteLine("Not enough money in the account.");
+            break;
+        case OmsErrorKind.PriceIsNotInRange:
+            Console.WriteLine("Price is outside the allowed range.");
+            break;
+        case OmsErrorKind.UserMoneyIsNotReady:
+            Console.WriteLine("Balance isn't ready yet. Try again shortly.");
+            break;
+        default:
+            Console.WriteLine($"{ex.Error?.Name} ({ex.Error?.Code}): {ex.Error?.Message}");
+            break;
+    }
+}</code></pre>
+        </div>
+        <p><code>OmsError</code> has <code>Kind</code>, the server's <code>Name</code> (for example <code>PriceIsNotInRangeError</code>), its Persian <code>Message</code>, and its <code>Code</code>. Names this SDK version doesn't know yet come back as <code>OmsErrorKind.Unknown</code>, with <code>Name</code> still set.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>OmsErrorKind</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>MoneyBalanceIsNotEnough</code></td><td>Not enough money in the account</td></tr>
+              <tr><td><code>PriceIsNotInRange</code></td><td>Price outside the allowed range</td></tr>
+              <tr><td><code>VolumeIsNotInRange</code></td><td>Quantity outside the allowed range</td></tr>
+              <tr><td><code>SymbolIsClose</code></td><td>The symbol is closed</td></tr>
+              <tr><td><code>GroupStateNotAllow</code></td><td>The symbol group's state doesn't allow trading</td></tr>
+              <tr><td><code>BuyNotAllowedInThisSymbol</code> / <code>SellNotAllowedInThisSymbol</code></td><td>Buying / selling not allowed on this symbol</td></tr>
+              <tr><td><code>SellOnBlockAsset</code></td><td>Blocked assets can't be sold</td></tr>
+              <tr><td><code>LowPricedSellIsNotAllowed</code></td><td>Sell order below the minimum value</td></tr>
+              <tr><td><code>BuyFromSelf</code> / <code>SellToSelf</code></td><td>The order could trade against your own order</td></tr>
+              <tr><td><code>UserMoneyIsNotReady</code></td><td>Balance not ready yet; try again</td></tr>
+              <tr><td><code>DuplicatedOrder</code></td><td>Duplicate order</td></tr>
+              <tr><td><code>OrderInterval</code></td><td>Orders sent too close together</td></tr>
+              <tr><td><code>RequestIsExpired</code></td><td>The request expired</td></tr>
+              <tr><td><code>NotEnoughBaseSymbolAssetForTabaee</code></td><td>A put option on a base symbol needs the underlying shares</td></tr>
+              <tr><td><code>ModifyOrder</code> / <code>DeleteOrder</code></td><td>The order couldn't be edited / deleted</td></tr>
+              <tr><td><code>ErrorInGetOrderRule</code>, <code>LoadSymbol</code>, <code>InternalSystem</code></td><td>Server-side failures</td></tr>
+              <tr><td><code>Custom</code></td><td>Server-defined error; see <code>Message</code> and <code>Code</code></td></tr>
+              <tr><td><code>Unknown</code></td><td>Name not recognized by this SDK version</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="unknown-state">
+        <h2>Timeouts: unknown order state</h2>
+        <p>Sometimes no response arrives within <code>Timeout</code> (30 s by default), or the connection breaks after the request was sent. The server may or may not have applied the request, so the SDK throws <code>EasyTraderOrderStateUnknownException</code>.</p>
+        <div class="callout warn">
+          <p><strong>Don't blindly retry.</strong> A retried add can place a duplicate order. Check your orders on d.easytrader.ir first.</p>
+        </div>
+        <div class="code">
+          <div class="code-head"><span>C#</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-csharp">try
+{
+    await client.AddOrderAsync(request);
+}
+catch (EasyTraderOrderStateUnknownException ex)
+{
+    // ex.Operation:     Add, Edit or Delete
+    // ex.TargetOrderId: the order an edit or delete targeted (null for Add)
+    logger.LogWarning("Order state unknown after {Operation} of {OrderId}; check before retrying",
+        ex.Operation, ex.TargetOrderId);
+}
+catch (EasyTraderConnectionException)
+{
+    // Couldn't connect at all (DNS, TCP or TLS). Nothing was sent, so a retry is safe.
+}</code></pre>
+        </div>
+      </section>
+
+      <section id="token-refresh">
+        <h2>Replacing an expired token</h2>
+        <p>Keep a <code>StaticTokenProvider</code> and give it a new token. There's no need to recreate the client.</p>
+        <div class="code">
+          <div class="code-head"><span>C#</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-csharp">var tokens = new StaticTokenProvider(token);
+var client = new EasyTraderClient(tokens);
+
+Console.WriteLine($"Token expires at {tokens.ExpiresAt}");
+
+// Later, when it expires:
+tokens.SetToken(newToken);</code></pre>
+        </div>
+        <p>To load the token from your own source, such as a secret store, implement <code>IEasyTraderTokenProvider</code>. It's called before every request.</p>
+      </section>
+
+      <section id="di">
+        <h2>Dependency injection</h2>
+        <div class="code">
+          <div class="code-head"><span>Program.cs</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-csharp">builder.Services.AddEasyTraderClient(options =>
+{
+    options.AccessToken = token;
+});
+
+// Inject IEasyTraderClient anywhere:
+public class OrderService(IEasyTraderClient easyTrader)
+{
+    public Task&lt;OrderResponse&gt; BuyAsync(string isin, long price, long quantity) =>
+        easyTrader.AddOrderAsync(new AddOrderRequest(isin, OrderSide.Buy, price, quantity));
+}
+
+// Swap the token at runtime:
+app.Services.GetRequiredService&lt;StaticTokenProvider&gt;().SetToken(newToken);</code></pre>
+        </div>
+        <p><code>AddEasyTraderClient</code> returns an <code>IHttpClientBuilder</code> for adding your own handlers. <strong>Don't add automatic retries</strong> to add or edit calls: if a request times out after the server accepted it, a retry can place a duplicate order.</p>
+      </section>
+
+      <section id="errors">
+        <h2>Errors</h2>
+        <p>All SDK exceptions derive from <code>EasyTraderException</code>. The last column says whether your order might have changed.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Exception</th><th>When</th><th>Order changed?</th></tr></thead>
+            <tbody>
+              <tr><td><code>ArgumentException</code></td><td>Invalid input: empty order ID, ISIN not 12 characters, price or quantity ≤ 0</td><td class="yes">No, nothing sent</td></tr>
+              <tr><td><code>EasyTraderAuthenticationException</code></td><td>Token missing, malformed or expired, or the server returned 401/403</td><td class="yes">No</td></tr>
+              <tr><td><code>EasyTraderConnectionException</code></td><td>Couldn't connect (DNS, TCP or TLS failure)</td><td class="yes">No, safe to retry</td></tr>
+              <tr><td><code>EasyTraderOrderException</code></td><td>The OMS rejected the request. <code>Error</code> holds the reason, <code>OrderId</code> the rejected order's ID.</td><td class="yes">No</td></tr>
+              <tr><td><code>EasyTraderOrderStateUnknownException</code></td><td>Timed out, or the connection broke after sending</td><td class="unknown">Unknown, check first</td></tr>
+              <tr><td><code>EasyTraderApiException</code></td><td>Other HTTP errors, or an unexpected response</td><td class="unknown">Unknown</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="options">
+        <h2>Options</h2>
+        <div class="code">
+          <div class="code-head"><span>C#</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-csharp">var client = new EasyTraderClient(token, new EasyTraderOptions
+{
+    Timeout = TimeSpan.FromSeconds(15),
+    TokenExpirySkew = TimeSpan.FromMinutes(1),
+});</code></pre>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>BaseAddress</code></td><td><code>https://api-mts.orbis.easytrader.ir/</code></td><td>API address</td></tr>
+              <tr><td><code>AccessToken</code></td><td>–</td><td>Initial token (dependency injection only)</td></tr>
+              <tr><td><code>OrderFrom</code></td><td><code>1000</code></td><td><code>orderFrom</code> value sent with each request</td></tr>
+              <tr><td><code>TokenExpirySkew</code></td><td>30 s</td><td>Treat the token as expired this long before <code>exp</code></td></tr>
+              <tr><td><code>Timeout</code></td><td>30 s</td><td>How long to wait before throwing <code>EasyTraderOrderStateUnknownException</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="sample">
+        <h2>Sample app</h2>
+        <p>The repository includes a console app that places a real order, edits it, then deletes it. It keeps track of which order is live, so it deletes that order even if a step fails.</p>
+        <div class="code">
+          <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-plaintext">dotnet run --project samples/MofidEasySdk.Sample -- &lt;token&gt;</code></pre>
+        </div>
+        <div class="callout warn">
+          <p><strong>This uses real money.</strong> The sample buys 244 shares of IRO1TBAN0001 on your account before deleting the order.</p>
+        </div>
+        <p><a href="https://github.com/alireza267/MofidEasySdk/blob/main/samples/MofidEasySdk.Sample/Program.cs">Read the sample source →</a></p>
+      </section>
+
+      <footer>
+        <p>MofidEasySdk is open source. Contributions go through pull requests; see the <a href="https://github.com/alireza267/MofidEasySdk/blob/main/CONTRIBUTING.md">contribution guide</a>.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Syntax highlighting (optional: the page reads fine without it)
+    try { if (window.hljs) hljs.highlightAll(); } catch (e) {}
+
+    // Copy buttons
+    document.querySelectorAll('.code').forEach(function (block) {
+      var button = block.querySelector('.copy');
+      var code = block.querySelector('pre code');
+      if (!button || !code) return;
+      button.addEventListener('click', function () {
+        navigator.clipboard.writeText(code.innerText).then(function () {
+          button.textContent = 'Copied';
+          setTimeout(function () { button.textContent = 'Copy'; }, 1500);
+        }).catch(function () { button.textContent = 'Press Ctrl+C'; });
+      });
+    });
+
+    // Theme toggle, remembered per browser
+    (function () {
+      var root = document.documentElement;
+      try {
+        var saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+      } catch (e) {}
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var current = root.getAttribute('data-theme') ||
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+    })();
+
+    // Highlight the current section in the sidebar
+    (function () {
+      var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+      if (!('IntersectionObserver' in window) || links.length === 0) return;
+      var byId = {};
+      links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          links.forEach(function (a) { a.classList.remove('active'); });
+          var link = byId[entry.target.id];
+          if (link) link.classList.add('active');
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      Object.keys(byId).forEach(function (id) {
+        var section = document.getElementById(id);
+        if (section) observer.observe(section);
+      });
+    })();
+  </script>
+</body>
+</html>

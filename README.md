@@ -4,6 +4,8 @@ A .NET 10 client for adding, editing and deleting orders on the Mofid EasyTrader
 
 It handles the request formats, the bearer token, token-expiry checks and error mapping, so your code only deals with orders.
 
+**Docs and examples:** [alireza267.github.io/MofidEasySdk](https://alireza267.github.io/MofidEasySdk/)
+
 ## Get your access token
 
 1. Log in to [d.easytrader.ir](https://d.easytrader.ir).
