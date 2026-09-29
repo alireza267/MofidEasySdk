@@ -1,0 +1,32 @@
+// GitHub Codespaces setup: opens the repo with the .NET SDK installed and starts the web demo.
+// https://containers.dev/implementors/json_reference/
+{
+  "name": "MofidEasySdk",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    // Keep in sync with global.json.
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "10.0.203"
+    }
+  },
+  "postCreateCommand": "dotnet restore MofidEasySdk.slnx && dotnet build MofidEasySdk.slnx --no-restore",
+  // Starts the demo in a terminal each time you open the codespace. Stop it with Ctrl+C.
+  "postAttachCommand": {
+    "demo": "dotnet run --project samples/MofidEasySdk.WebDemo --no-build"
+  },
+  "forwardPorts": [5080],
+  "portsAttributes": {
+    "5080": {
+      "label": "EasyTrader demo",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-dotnettools.csdevkit"]
+    },
+    "codespaces": {
+      "openFiles": ["README.md"]
+    }
+  }
+}

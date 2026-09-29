@@ -290,13 +290,27 @@
       <section id="try">
         <h2>Try it: interactive demo</h2>
         <p>Want to see the SDK work before writing code? The repository includes a small web app. Paste your token, fill in an order, and add, edit or delete it with a click.</p>
+
+        <h3>Run it on GitHub</h3>
+        <p>No install needed. GitHub Codespaces starts the demo in the cloud and opens it in your browser.</p>
+        <p><a href="https://codespaces.new/alireza267/MofidEasySdk?quickstart=1"><img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" height="32"></a></p>
+        <ol class="steps">
+          <li>Click the button and choose <strong>Create codespace</strong>. The first start takes a few minutes.</li>
+          <li>The demo starts by itself and opens in a new tab. If it doesn't, open the <strong>Ports</strong> tab and click the globe icon next to <em>EasyTrader demo</em>.</li>
+          <li>When you're done, stop the codespace so it doesn't use up your free hours.</li>
+        </ol>
+        <p class="note-muted">The forwarded port is private: only you can open it, after signing in to GitHub.</p>
+
+        <h3>Or run it on your machine</h3>
         <div class="code">
           <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
           <pre><code class="language-plaintext">git clone https://github.com/alireza267/MofidEasySdk.git
 cd MofidEasySdk
 dotnet run --project samples/MofidEasySdk.WebDemo</code></pre>
         </div>
-        <p>Your browser opens <code>http://localhost:5080</code>. Then:</p>
+        <p>Your browser opens <code>http://localhost:5080</code>.</p>
+
+        <h3>Using the demo</h3>
         <ol class="steps">
           <li><strong>Paste your token</strong> (see <a href="#token">Get your access token</a>). The page shows when it expires.</li>
           <li><strong>Fill in the order</strong>: ISIN, buy or sell, price and quantity, then click <em>Place order</em>.</li>
@@ -304,9 +318,9 @@ dotnet run --project samples/MofidEasySdk.WebDemo</code></pre>
         </ol>
         <p>Every response appears in the activity log, including OMS rejections with their Persian messages and <em>unknown state</em> warnings after timeouts.</p>
         <div class="callout warn">
-          <p><strong>The orders are real.</strong> Test with small quantities and prices far from the market. The demo runs on your own machine, only accepts local connections, and keeps the token in memory only.</p>
+          <p><strong>The orders are real.</strong> Test with small quantities and prices far from the market. Only you can open your demo, whether it runs in your codespace or on your machine, and the token is kept in memory only.</p>
         </div>
-        <p class="note-muted">Why not run it right here on this page? The EasyTrader API only accepts browser requests from d.easytrader.ir, so the demo calls it from a local .NET app instead.</p>
+        <p class="note-muted">Why not run it right here on this page? The EasyTrader API only accepts browser requests from d.easytrader.ir, so the demo calls it from a .NET app instead.</p>
       </section>
 
       <section id="install">

@@ -167,13 +167,27 @@ All SDK exceptions derive from `EasyTraderException`. Cancelling through your `C
 
 ## Web demo
 
-`samples/MofidEasySdk.WebDemo` is a local web page for trying the SDK without writing code. Paste your token, fill in the order fields, and add, edit or delete orders. It tracks each order's status (live, replaced, deleted, rejected, unknown) and logs every response, including the OMS error messages.
+`samples/MofidEasySdk.WebDemo` is a web page for trying the SDK without writing code. Paste your token, fill in the order fields, and add, edit or delete orders. It tracks each order's status (live, replaced, deleted, rejected, unknown) and logs every response, including the OMS error messages.
+
+**The orders are real.** The app keeps the token in memory and never writes it to disk.
+
+### Run it on GitHub (no install)
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/alireza267/MofidEasySdk?quickstart=1)
+
+1. Click the button and choose **Create codespace**. The first start takes a few minutes while it installs .NET and builds.
+2. The demo starts by itself, and the page opens in a new browser tab. If it doesn't, open the **Ports** tab and click the globe icon next to **EasyTrader demo**.
+3. Stop the codespace when you're done (**github.com/codespaces → ⋯ → Stop codespace**), so it doesn't use up your free hours.
+
+The port is private: only you can open it, after signing in to GitHub.
+
+### Run it on your machine
 
 ```
 dotnet run --project samples/MofidEasySdk.WebDemo
 ```
 
-It opens http://localhost:5080 in your browser. **The orders are real.** The app only accepts connections from your own machine, keeps the token in memory, and never writes it to disk. Use `--Port=5090` to change the port.
+It opens http://localhost:5080 in your browser. Only connections from your own machine are accepted. Use `--Port=5090` to change the port.
 
 ## Console sample
 

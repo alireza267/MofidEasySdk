@@ -2,14 +2,29 @@ using System.Diagnostics;
 using System.Text.Json.Serialization;
 using MofidEasySdk;
 
-// A local web page for trying the SDK: paste your token, then add, edit and delete REAL orders.
+// A web page for trying the SDK: paste your token, then add, edit and delete REAL orders.
 // Run:  dotnet run --project samples/MofidEasySdk.WebDemo
 // Then open http://localhost:5080 (it opens automatically).
+// In GitHub Codespaces it's reached through the codespace's private forwarded port instead.
 
 var builder = WebApplication.CreateBuilder(args);
 var port = builder.Configuration.GetValue("Port", 5080);
 
-// The app holds a trading token, so it only accepts connections from this machine.
+// The hosts the page may be reached on. In a codespace, GitHub forwards the port to
+// https://<codespace>-<port>.<forwarding domain>, which only the codespace owner can open.
+var allowedHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "localhost", "127.0.0.1", "[::1]", "::1" };
+var codespaceName = Environment.GetEnvironmentVariable("CODESPACE_NAME");
+var forwardingDomain = Environment.GetEnvironmentVariable("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN");
+var codespaceHost = string.IsNullOrEmpty(codespaceName) || string.IsNullOrEmpty(forwardingDomain)
+    ? null
+    : $"{codespaceName}-{port}.{forwardingDomain}";
+if (codespaceHost is not null)
+{
+    allowedHosts.Add(codespaceHost);
+}
+
+// The app holds a trading token, so it only accepts connections from this machine
+// (or, in a codespace, from GitHub's port forwarding, which connects locally).
 builder.WebHost.ConfigureKestrel(kestrel => kestrel.ListenLocalhost(port));
 
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -27,9 +42,7 @@ app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api"))
     {
-        var host = context.Request.Host.Host;
-        var isLocalHost = host is "localhost" or "127.0.0.1" or "[::1]" or "::1";
-        if (!isLocalHost || !context.Request.Headers.ContainsKey(DemoApi.ClientHeader))
+        if (!allowedHosts.Contains(context.Request.Host.Host) || !context.Request.Headers.ContainsKey(DemoApi.ClientHeader))
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
@@ -76,11 +89,13 @@ api.MapPost("/orders/edit", (EditOrderInput input, IEasyTraderClient client) =>
 api.MapPost("/orders/delete", (DeleteOrderInput input, IEasyTraderClient client) =>
     DemoApi.Run(() => client.DeleteOrderAsync(input.OrderId)));
 
-var url = $"http://localhost:{port}";
+var url = codespaceHost is null ? $"http://localhost:{port}" : $"https://{codespaceHost}";
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     Console.WriteLine($"EasyTrader SDK demo running at {url}  (Ctrl+C to stop)");
-    if (!app.Configuration.GetValue("OpenBrowser", true))
+
+    // Codespaces opens the forwarded port in your browser itself.
+    if (codespaceHost is not null || !app.Configuration.GetValue("OpenBrowser", true))
     {
         return;
     }
