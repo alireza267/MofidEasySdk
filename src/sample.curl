@@ -1,0 +1,46 @@
+
+add order
+curl --url 'https://api-mts.orbis.easytrader.ir/core/api/v2/order' \
+  -H 'sec-ch-ua-platform: "Windows"' \
+  -H 'Authorization: Bearer {copied_jwt_token_here}' \
+  -H 'easy-sdk: {sdk_version_here}' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "order":
+    {
+        "price":20520,
+        "quantity":244,
+        "side":0,
+        "validityType":0,
+        "symbolIsin":"IRO1TBAN0001",
+        "orderFrom":1000}}'
+
+//edit order
+  curl --request PUT \
+  --url https://api-mts.orbis.easytrader.ir/core/api/v2/order \
+  --header 'accept: application/json, text/plain, */*' \
+  --header 'authorization: Bearer {copied_jwt_token_here}' \
+  --header 'content-type: application/json' \
+  --data '{
+	"modifyOrder": {
+		"price": 20520,
+		"quantity": 270,
+		"validityType": 0,
+		"symbolIsin": "IRO1TBAN0001",
+		"orderFrom": 1000,
+		"parentId": "1121DNo37t!!=Q>r"
+	}
+}'
+
+
+//delete 
+curl --url 'https://api-mts.orbis.easytrader.ir/core/api/v2/delete-order' \
+  -X 'DELETE' \
+  -H 'Authorization: Bearer {copied_jwt_token_here}' \
+  -H 'Accept: application/json, text/plain, */*' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "orderId":"1121DNo37t}1*5@Z",
+    "orderFrom":1000
+    }'
