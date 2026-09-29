@@ -27,7 +27,7 @@ internal sealed class RecordingHandler(HttpStatusCode statusCode = HttpStatusCod
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var body = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
-        Requests.Add(new CapturedRequest(request.Method, request.RequestUri!, request.Headers, body));
+        Requests.Add(new CapturedRequest(request.Method, request.RequestUri!, request.Headers, body, request.Content?.Headers));
         return new HttpResponseMessage(statusCode) { Content = new StringContent(responseBody, Encoding.UTF8, "application/json") };
     }
 }
@@ -47,7 +47,12 @@ internal sealed class DelegateHandler(Func<HttpRequestMessage, CancellationToken
         send(request, cancellationToken);
 }
 
-internal sealed record CapturedRequest(HttpMethod Method, Uri Uri, System.Net.Http.Headers.HttpRequestHeaders Headers, string? Body);
+internal sealed record CapturedRequest(
+    HttpMethod Method,
+    Uri Uri,
+    System.Net.Http.Headers.HttpRequestHeaders Headers,
+    string? Body,
+    System.Net.Http.Headers.HttpContentHeaders? ContentHeaders);
 
 internal static class TestClient
 {

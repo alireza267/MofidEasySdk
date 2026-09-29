@@ -165,7 +165,17 @@ app.Services.GetRequiredService<StaticTokenProvider>().SetToken(newToken);
 
 All SDK exceptions derive from `EasyTraderException`. Cancelling through your `CancellationToken` throws `OperationCanceledException`; if you cancel after the request was sent, the order state is unknown.
 
-## Sample
+## Web demo
+
+`samples/MofidEasySdk.WebDemo` is a local web page for trying the SDK without writing code. Paste your token, fill in the order fields, and add, edit or delete orders. It tracks each order's status (live, replaced, deleted, rejected, unknown) and logs every response, including the OMS error messages.
+
+```
+dotnet run --project samples/MofidEasySdk.WebDemo
+```
+
+It opens http://localhost:5080 in your browser. **The orders are real.** The app only accepts connections from your own machine, keeps the token in memory, and never writes it to disk. Use `--Port=5090` to change the port.
+
+## Console sample
 
 `samples/MofidEasySdk.Sample` adds a real order, edits it, then deletes it. It tracks which order is live, so it deletes that order even if a step fails:
 

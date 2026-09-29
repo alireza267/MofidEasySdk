@@ -223,6 +223,7 @@
       display: grid; place-items: center;
     }
 
+    .note-muted { font-size: 14px; color: var(--text-muted); }
     footer { border-top: 1px solid var(--border); margin-top: 64px; padding-top: 24px; color: var(--text-muted); font-size: 14px; }
 
     @media (max-width: 860px) {
@@ -250,6 +251,7 @@
   <div class="layout">
     <aside class="toc" aria-label="On this page">
       <p>On this page</p>
+      <a href="#try">Try it</a>
       <a href="#install">Install</a>
       <a href="#token">Get your token</a>
       <a href="#quick-start">Quick start</a>
@@ -273,7 +275,8 @@
           <span class="pill">Dependency injection ready</span>
         </div>
         <div class="actions">
-          <a class="btn primary" href="#quick-start">Get started</a>
+          <a class="btn primary" href="#try">Try the demo</a>
+          <a class="btn" href="#quick-start">Read the docs</a>
           <a class="btn" href="https://github.com/alireza267/MofidEasySdk">View on GitHub</a>
         </div>
         <div class="features">
@@ -283,6 +286,28 @@
           <div class="feature"><strong>Token checks</strong><span>An expired JWT is caught before sending, with a clear message.</span></div>
         </div>
       </div>
+
+      <section id="try">
+        <h2>Try it: interactive demo</h2>
+        <p>Want to see the SDK work before writing code? The repository includes a small web app. Paste your token, fill in an order, and add, edit or delete it with a click.</p>
+        <div class="code">
+          <div class="code-head"><span>Terminal</span><button class="copy" type="button">Copy</button></div>
+          <pre><code class="language-plaintext">git clone https://github.com/alireza267/MofidEasySdk.git
+cd MofidEasySdk
+dotnet run --project samples/MofidEasySdk.WebDemo</code></pre>
+        </div>
+        <p>Your browser opens <code>http://localhost:5080</code>. Then:</p>
+        <ol class="steps">
+          <li><strong>Paste your token</strong> (see <a href="#token">Get your access token</a>). The page shows when it expires.</li>
+          <li><strong>Fill in the order</strong>: ISIN, buy or sell, price and quantity, then click <em>Place order</em>.</li>
+          <li><strong>Manage it</strong> in the order list: <em>Edit</em> changes price or quantity, and the row updates to the new order ID. <em>Delete</em> cancels it.</li>
+        </ol>
+        <p>Every response appears in the activity log, including OMS rejections with their Persian messages and <em>unknown state</em> warnings after timeouts.</p>
+        <div class="callout warn">
+          <p><strong>The orders are real.</strong> Test with small quantities and prices far from the market. The demo runs on your own machine, only accepts local connections, and keeps the token in memory only.</p>
+        </div>
+        <p class="note-muted">Why not run it right here on this page? The EasyTrader API only accepts browser requests from d.easytrader.ir, so the demo calls it from a local .NET app instead.</p>
+      </section>
 
       <section id="install">
         <h2>Install</h2>

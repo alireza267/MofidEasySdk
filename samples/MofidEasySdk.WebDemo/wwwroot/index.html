@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EasyTrader SDK Demo</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-soft: #f3f5f7;
+      --border: #e3e6eb;
+      --text: #1b1f24;
+      --text-muted: #5b6570;
+      --accent: #0b6e4f;
+      --accent-soft: #e5f3ee;
+      --buy: #0b6e4f;
+      --buy-soft: #e5f3ee;
+      --sell: #b42318;
+      --sell-soft: #fdecea;
+      --warn: #9a5b00;
+      --warn-soft: #fdf3e2;
+      --muted-soft: #eef0f3;
+      --shadow: 0 1px 2px rgba(16, 24, 40, .06);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f1216;
+        --surface: #151a20;
+        --surface-soft: #1b2129;
+        --border: #262d36;
+        --text: #e6e9ed;
+        --text-muted: #9aa4af;
+        --accent: #3ecf9b;
+        --accent-soft: #10291f;
+        --buy: #3ecf9b;
+        --buy-soft: #10291f;
+        --sell: #f97066;
+        --sell-soft: #2c1513;
+        --warn: #f0b35b;
+        --warn-soft: #2a1f0f;
+        --muted-soft: #1f252d;
+        --shadow: none;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f1216;
+      --surface: #151a20;
+      --surface-soft: #1b2129;
+      --border: #262d36;
+      --text: #e6e9ed;
+      --text-muted: #9aa4af;
+      --accent: #3ecf9b;
+      --accent-soft: #10291f;
+      --buy: #3ecf9b;
+      --buy-soft: #10291f;
+      --sell: #f97066;
+      --sell-soft: #2c1513;
+      --warn: #f0b35b;
+      --warn-soft: #2a1f0f;
+      --muted-soft: #1f252d;
+      --shadow: none;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    code, .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .92em; }
+    a { color: var(--accent); }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
+    header.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    header.top h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
+    header.top .sub { color: var(--text-muted); font-size: 14px; }
+    header.top .spacer { flex: 1; }
+
+    .banner {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: var(--warn-soft); border: 1px solid var(--border); border-left: 4px solid var(--warn);
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; font-size: 14px;
+    }
+    .banner strong { color: var(--warn); }
+
+    .grid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 20px; align-items: start; }
+    .col { display: grid; gap: 20px; min-width: 0; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); }
+    .card > .head { padding: 14px 16px 0; display: flex; align-items: baseline; gap: 8px; }
+    .card > .head h2 { font-size: 15px; margin: 0; }
+    .card > .head .step {
+      width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; flex: none;
+      background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700;
+    }
+    .card > .head .hint { margin-left: auto; font-size: 12px; color: var(--text-muted); }
+    .card > .body { padding: 12px 16px 16px; }
+
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin: 10px 0 4px; }
+    input[type=text], input[type=password], input[type=number] {
+      width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface-soft); color: var(--text); font: inherit;
+    }
+    input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .inline { display: flex; gap: 8px; align-items: center; }
+    .inline input { flex: 1; }
+
+    button {
+      font: inherit; font-weight: 600; font-size: 14px; cursor: pointer;
+      padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text);
+    }
+    button:hover:not(:disabled) { border-color: var(--text-muted); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+    button.danger { color: var(--sell); }
+    button.small { padding: 5px 10px; font-size: 13px; }
+    button.link { border: 0; background: none; padding: 0; color: var(--text-muted); font-weight: 500; font-size: 13px; }
+    .full { width: 100%; margin-top: 14px; }
+
+    .segmented { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+    .segmented label {
+      margin: 0; padding: 9px; text-align: center; cursor: pointer; font-size: 14px; color: var(--text-muted);
+      background: var(--surface-soft);
+    }
+    .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: -2px; }
+    #side-buy:checked + label { background: var(--buy-soft); color: var(--buy); }
+    #side-sell:checked + label { background: var(--sell-soft); color: var(--sell); }
+
+    .token-status { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 4px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); flex: none; }
+    .dot.ok { background: var(--accent); }
+    .dot.bad { background: var(--sell); }
+    .note { font-size: 12px; color: var(--text-muted); margin: 8px 0 0; }
+    .total { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+    .total strong { color: var(--text); }
+
+    details summary { cursor: pointer; font-size: 13px; color: var(--text-muted); margin-top: 14px; }
+
+    /* Orders table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: middle; }
+    th { font-size: 12px; color: var(--text-muted); font-weight: 600; background: var(--surface-soft); }
+    tbody tr:last-child td { border-bottom: 0; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    th.num { text-align: right; }
+    td.actions { text-align: right; }
+    td.actions button + button { margin-left: 6px; }
+    tr.inactive td { color: var(--text-muted); }
+    tr.edit-row td { background: var(--surface-soft); white-space: normal; }
+    .edit-form { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .edit-form label { margin-top: 0; }
+    .edit-form input { width: 140px; }
+    .empty { padding: 28px 16px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+    .chip {
+      display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+      background: var(--muted-soft); color: var(--text-muted);
+    }
+    .chip.live { background: var(--accent-soft); color: var(--accent); }
+    .chip.unknown { background: var(--warn-soft); color: var(--warn); }
+    .chip.rejected { background: var(--sell-soft); color: var(--sell); }
+    .side-buy { color: var(--buy); font-weight: 600; }
+    .side-sell { color: var(--sell); font-weight: 600; }
+
+    /* Activity log */
+    .log { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow-y: auto; }
+    .log li { padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .log li:last-child { border-bottom: 0; }
+    .log .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .log time { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .log .msg { margin-top: 4px; overflow-wrap: anywhere; }
+    .log .detail { margin-top: 4px; color: var(--text-muted); overflow-wrap: anywhere; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: minmax(0, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <h1>EasyTrader SDK demo</h1>
+      <span class="sub">Add, edit and delete orders with MofidEasySdk</span>
+      <span class="spacer"></span>
+      <button class="link" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐ Theme</button>
+    </header>
+
+    <div class="banner" role="note">
+      <span>⚠</span>
+      <div><strong>These are real orders on your account.</strong> Anything you place here goes to the EasyTrader matching engine and can be filled. Use small quantities and prices far from the market while testing.</div>
+    </div>
+
+    <div class="grid">
+      <div class="col">
+        <!-- Token -->
+        <section class="card" aria-labelledby="token-title">
+          <div class="head"><span class="step">1</span><h2 id="token-title">Access token</h2></div>
+          <div class="body">
+            <div class="token-status"><span class="dot" id="token-dot"></span><span id="token-text">Checking…</span></div>
+            <label for="token-input">Paste the token from d.easytrader.ir</label>
+            <div class="inline">
+              <input id="token-input" type="password" autocomplete="off" spellcheck="false" placeholder="eyJhbGciOi…">
+              <button class="small" id="token-show" type="button">Show</button>
+            </div>
+            <div class="inline" style="margin-top:10px">
+              <button class="primary" id="token-save" type="button">Use token</button>
+              <button id="token-clear" type="button" hidden>Forget token</button>
+            </div>
+            <p class="note">DevTools (F12) → Network → any request to <code>api-mts.orbis.easytrader.ir</code> → copy the <code>Authorization</code> header. The token stays in this local app's memory only.</p>
+          </div>
+        </section>
+
+        <!-- New order -->
+        <section class="card" aria-labelledby="order-title">
+          <div class="head"><span class="step">2</span><h2 id="order-title">New order</h2><span class="hint">Validity: Day</span></div>
+          <form class="body" id="order-form" novalidate>
+            <label for="isin">Symbol ISIN</label>
+            <input id="isin" type="text" maxlength="12" value="IRO1TBAN0001" spellcheck="false" autocomplete="off" class="mono">
+
+            <label>Side</label>
+            <div class="segmented" role="radiogroup" aria-label="Side">
+              <input type="radio" name="side" id="side-buy" value="Buy" checked><label for="side-buy">Buy</label>
+              <input type="radio" name="side" id="side-sell" value="Sell"><label for="side-sell">Sell</label>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="price">Price (Rials)</label>
+                <input id="price" type="number" min="1" step="1" inputmode="numeric" placeholder="20520">
+              </div>
+              <div>
+                <label for="quantity">Quantity</label>
+                <input id="quantity" type="number" min="1" step="1" inputmode="numeric" placeholder="100">
+              </div>
+            </div>
+            <div class="total" id="order-total">Total: –</div>
+
+            <button class="primary full" id="order-submit" type="submit">Place order</button>
+
+            <details>
+              <summary>Manage an order placed elsewhere</summary>
+              <p class="note">Add an existing order by its ID to edit or delete it here.</p>
+              <label for="track-id">Order ID</label>
+              <input id="track-id" type="text" spellcheck="false" autocomplete="off" class="mono">
+              <button id="track-submit" type="button" style="margin-top:10px">Add to list</button>
+              <p class="note">Uses the ISIN, side, price and quantity from the form above.</p>
+            </details>
+          </form>
+        </section>
+      </div>
+
+      <div class="col">
+        <!-- Orders -->
+        <section class="card" aria-labelledby="orders-title">
+          <div class="head"><span class="step">3</span><h2 id="orders-title">Your orders</h2><span class="hint">This session</span></div>
+          <div class="body" style="padding:12px 0 0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Order ID</th><th>Symbol</th><th>Side</th><th class="num">Price</th><th class="num">Qty</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody id="orders-body"></tbody>
+              </table>
+            </div>
+            <div class="empty" id="orders-empty">No orders yet. Place one on the left.</div>
+          </div>
+        </section>
+
+        <!-- Activity -->
+        <section class="card" aria-labelledby="log-title">
+          <div class="head"><h2 id="log-title">Activity</h2><button class="link" id="log-clear" type="button" style="margin-left:auto">Clear</button></div>
+          <div class="body" style="padding:8px 0 0">
+            <ul class="log" id="log"></ul>
+            <div class="empty" id="log-empty">Requests and responses will appear here.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    // ---------- helpers ----------
+    const $ = (id) => document.getElementById(id);
+    const fmt = new Intl.NumberFormat('en-US');
+
+    function el(tag, props, ...children) {
+      const node = document.createElement(tag);
+      Object.entries(props || {}).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === false) return;
+        if (key === 'class') node.className = value;
+        else if (key.startsWith('on')) node.addEventListener(key.slice(2), value);
+        else node.setAttribute(key, value === true ? '' : value);
+      });
+      children.flat().forEach((child) => {
+        if (child === null || child === undefined || child === false) return;
+        node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+      });
+      return node;
+    }
+
+    async function api(method, path, body) {
+      let response;
+      try {
+        response = await fetch('/api' + path, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'X-Demo-Client': '1' },
+          body: body === undefined ? undefined : JSON.stringify(body),
+        });
+      } catch (e) {
+        return { ok: false, outcome: 'notSent', message: 'The demo app is not running. Start it with dotnet run.' };
+      }
+      let data = null;
+      try { data = await response.json(); } catch (e) { /* empty or non-JSON body */ }
+      if (data && typeof data.ok === 'boolean') return data;
+      if (data && ('hasToken' in data)) return data;
+      // ASP.NET binding errors come back as problem details
+      const message = (data && (data.detail || data.title)) || ('HTTP ' + response.status);
+      return { ok: false, outcome: 'invalid', message };
+    }
+
+    const store = {
+      load() {
+        try { return JSON.parse(sessionStorage.getItem('demo-orders') || '[]'); } catch (e) { return []; }
+      },
+      save(orders) {
+        try { sessionStorage.setItem('demo-orders', JSON.stringify(orders)); } catch (e) { /* storage unavailable */ }
+      },
+    };
+
+    // ---------- state ----------
+    let orders = store.load();   // { id, isin, side, price, quantity, status, note }
+    let hasToken = false;
+    let expiresAt = null;
+    let busy = false;
+    let editingId = null;
+
+    // ---------- token ----------
+    function renderToken() {
+      const dot = $('token-dot');
+      const text = $('token-text');
+      $('token-clear').hidden = !hasToken;
+      if (!hasToken) {
+        dot.className = 'dot bad';
+        text.textContent = 'No token set';
+      } else if (expiresAt) {
+        const exp = new Date(expiresAt);
+        const minutes = Math.round((exp - Date.now()) / 60000);
+        const clock = exp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (minutes <= 0) {
+          dot.className = 'dot bad';
+          text.textContent = 'Token expired at ' + clock + '. Paste a fresh one.';
+        } else {
+          dot.className = 'dot ok';
+          text.textContent = 'Token set · expires at ' + clock + ' (in ' + (minutes >= 60 ? Math.floor(minutes / 60) + ' h ' + (minutes % 60) + ' min' : minutes + ' min') + ')';
+        }
+      } else {
+        dot.className = 'dot ok';
+        text.textContent = 'Token set (no expiry claim)';
+      }
+      renderButtons();
+    }
+
+    function applyTokenStatus(status) {
+      hasToken = !!status.hasToken;
+      expiresAt = status.expiresAt || null;
+      renderToken();
+    }
+
+    async function saveToken() {
+      const token = $('token-input').value.trim();
+      if (!token) { $('token-input').focus(); return; }
+      const result = await api('PUT', '/token', { token });
+      if ('hasToken' in result) {
+        applyTokenStatus(result);
+        $('token-input').value = '';
+        log('Token', { ok: true, outcome: 'accepted', message: 'Token set.' });
+      } else {
+        log('Token', result);
+      }
+    }
+
+    async function clearToken() {
+      applyTokenStatus(await api('DELETE', '/token'));
+      log('Token', { ok: true, outcome: 'accepted', message: 'Token removed from the demo app.' });
+    }
+
+    // ---------- orders ----------
+    function readForm() {
+      return {
+        isin: $('isin').value.trim().toUpperCase(),
+        side: document.querySelector('input[name=side]:checked').value,
+        price: Number($('price').value),
+        quantity: Number($('quantity').value),
+      };
+    }
+
+    function updateTotal() {
+      const { price, quantity } = readForm();
+      $('order-total').innerHTML = '';
+      $('order-total').append(price > 0 && quantity > 0
+        ? el('span', null, 'Total: ', el('strong', null, fmt.format(price * quantity)), ' Rials')
+        : 'Total: –');
+    }
+
+    function validate(form) {
+      if (!/^[A-Z0-9]{12}$/.test(form.isin)) return 'ISIN must be 12 letters or digits, for example IRO1TBAN0001.';
+      if (!(form.price > 0) || !Number.isInteger(form.price)) return 'Price must be a whole number above 0.';
+      if (!(form.quantity > 0) || !Number.isInteger(form.quantity)) return 'Quantity must be a whole number above 0.';
+      return null;
+    }
+
+    async function placeOrder(event) {
+      event.preventDefault();
+      const form = readForm();
+      const problem = validate(form);
+      if (problem) { log('Add', { ok: false, outcome: 'invalid', message: problem }); return; }
+      const summary = form.side.toUpperCase() + ' ' + fmt.format(form.quantity) + ' × ' + form.isin + ' at ' + fmt.format(form.price) + ' Rials';
+      if (!confirm('Place a REAL order?\n\n' + summary)) return;
+
+      await withBusy(async () => {
+        const result = await api('POST', '/orders', {
+          symbolIsin: form.isin, side: form.side, price: form.price, quantity: form.quantity,
+        });
+        log('Add ' + summary, result);
+        if (result.ok) {
+          orders.unshift({ id: result.orderId, isin: form.isin, side: form.side, price: form.price, quantity: form.quantity, status: 'live' });
+        } else if (result.outcome === 'rejected' && result.orderId) {
+          orders.unshift({ id: result.orderId, isin: form.isin, side: form.side, price: form.price, quantity: form.quantity, status: 'rejected', note: kindOf(result) });
+        } else if (result.outcome === 'unknownState') {
+          orders.unshift({ id: '(unknown)', isin: form.isin, side: form.side, price: form.price, quantity: form.quantity, status: 'unknown', note: 'Check on d.easytrader.ir' });
+        }
+        saveOrders();
+      });
+    }
+
+    function trackOrder() {
+      const id = $('track-id').value.trim();
+      const form = readForm();
+      if (!id) { $('track-id').focus(); return; }
+      const problem = validate(form);
+      if (problem) { log('Track', { ok: false, outcome: 'invalid', message: problem }); return; }
+      orders.unshift({ id, isin: form.isin, side: form.side, price: form.price, quantity: form.quantity, status: 'live', note: 'Added manually' });
+      $('track-id').value = '';
+      saveOrders();
+      log('Track', { ok: true, outcome: 'accepted', message: 'Order ' + id + ' added to the list.' });
+    }
+
+    async function editOrder(order, price, quantity) {
+      const summary = order.id + ' → ' + fmt.format(quantity) + ' at ' + fmt.format(price) + ' Rials';
+      if (!confirm('Edit this REAL order?\n\n' + summary + '\n\nThe edit replaces the order with a new one.')) return;
+
+      await withBusy(async () => {
+        const result = await api('POST', '/orders/edit', { orderId: order.id, symbolIsin: order.isin, price, quantity });
+        log('Edit ' + summary, result);
+        if (result.ok) {
+          // The old order leaves the matching engine; the new one carries a new ID.
+          order.status = 'replaced';
+          order.note = 'Replaced by ' + result.orderId;
+          orders.unshift({ id: result.orderId, isin: order.isin, side: order.side, price, quantity, status: 'live', note: 'Edited from ' + order.id });
+        } else if (result.outcome === 'unknownState') {
+          order.status = 'unknown';
+          order.note = 'Edit state unknown. Check on d.easytrader.ir';
+        }
+        editingId = null;
+        saveOrders();
+      });
+    }
+
+    async function deleteOrder(order) {
+      if (!confirm('Delete this order?\n\n' + order.id)) return;
+      await withBusy(async () => {
+        const result = await api('POST', '/orders/delete', { orderId: order.id });
+        log('Delete ' + order.id, result);
+        if (result.ok) {
+          order.status = 'deleted';
+          order.note = null;
+        } else if (result.outcome === 'unknownState') {
+          order.status = 'unknown';
+          order.note = 'Delete state unknown. Check on d.easytrader.ir';
+        }
+        saveOrders();
+      });
+    }
+
+    function saveOrders() {
+      store.save(orders);
+      renderOrders();
+    }
+
+    function kindOf(result) {
+      return result.error ? (result.error.kind + ' (' + result.error.code + ')') : 'Rejected';
+    }
+
+    // ---------- rendering ----------
+    const statusLabels = { live: 'Live', replaced: 'Replaced', deleted: 'Deleted', rejected: 'Rejected', unknown: 'Unknown' };
+
+    function renderOrders() {
+      const body = $('orders-body');
+      body.innerHTML = '';
+      $('orders-empty').hidden = orders.length > 0;
+
+      orders.forEach((order) => {
+        const active = order.status === 'live' || order.status === 'unknown';
+        const canAct = active && order.id !== '(unknown)';
+        body.append(el('tr', { class: active ? null : 'inactive' },
+          el('td', { class: 'mono' }, order.id),
+          el('td', { class: 'mono' }, order.isin),
+          el('td', { class: order.side === 'Buy' ? 'side-buy' : 'side-sell' }, order.side),
+          el('td', { class: 'num' }, fmt.format(order.price)),
+          el('td', { class: 'num' }, fmt.format(order.quantity)),
+          el('td', null,
+            el('span', { class: 'chip ' + order.status }, statusLabels[order.status] || order.status),
+            order.note ? el('div', { class: 'note', style: 'margin:2px 0 0' }, order.note) : null),
+          el('td', { class: 'actions' },
+            canAct ? el('button', { class: 'small', type: 'button', disabled: busy || !hasToken, onclick: () => { editingId = editingId === order.id ? null : order.id; renderOrders(); } }, editingId === order.id ? 'Close' : 'Edit') : null,
+            canAct ? el('button', { class: 'small danger', type: 'button', disabled: busy || !hasToken, onclick: () => deleteOrder(order) }, 'Delete') : null)));
+
+        if (editingId === order.id) {
+          const priceInput = el('input', { type: 'number', min: '1', step: '1', value: order.price, id: 'edit-price' });
+          const quantityInput = el('input', { type: 'number', min: '1', step: '1', value: order.quantity, id: 'edit-quantity' });
+          body.append(el('tr', { class: 'edit-row' },
+            el('td', { colspan: '7' },
+              el('div', { class: 'edit-form' },
+                el('div', null, el('label', { for: 'edit-price' }, 'New price'), priceInput),
+                el('div', null, el('label', { for: 'edit-quantity' }, 'New quantity'), quantityInput),
+                el('button', {
+                  class: 'primary', type: 'button', disabled: busy,
+                  onclick: () => {
+                    const price = Number(priceInput.value);
+                    const quantity = Number(quantityInput.value);
+                    if (!(price > 0 && quantity > 0 && Number.isInteger(price) && Number.isInteger(quantity))) {
+                      log('Edit', { ok: false, outcome: 'invalid', message: 'Price and quantity must be whole numbers above 0.' });
+                      return;
+                    }
+                    editOrder(order, price, quantity);
+                  },
+                }, 'Save edit'),
+                el('span', { class: 'note', style: 'margin:0' }, 'Creates a new order with a new ID.')))));
+        }
+      });
+      renderButtons();
+    }
+
+    function renderButtons() {
+      $('order-submit').disabled = busy || !hasToken;
+      $('order-submit').textContent = busy ? 'Sending…' : (hasToken ? 'Place order' : 'Set a token first');
+      $('token-save').disabled = busy;
+    }
+
+    const outcomeLabels = {
+      accepted: ['Accepted', 'live'],
+      rejected: ['Rejected', 'rejected'],
+      unknownState: ['State unknown', 'unknown'],
+      notSent: ['Not sent', 'rejected'],
+      auth: ['Token problem', 'rejected'],
+      apiError: ['API error', 'rejected'],
+      invalid: ['Invalid input', 'rejected'],
+    };
+
+    function log(action, result) {
+      const [label, cls] = outcomeLabels[result.outcome] || [result.outcome, ''];
+      const details = [];
+      if (result.ok && result.orderId) details.push('Order ID: ' + result.orderId);
+      if (result.error) details.push(result.error.kind + ' · ' + result.error.name + ' · code ' + result.error.code);
+      if (!result.ok && result.orderId) details.push('Order ID: ' + result.orderId);
+
+      $('log').prepend(el('li', null,
+        el('div', { class: 'meta' },
+          el('time', null, new Date().toLocaleTimeString()),
+          el('span', { class: 'chip ' + cls }, label),
+          el('strong', null, action)),
+        result.error && result.error.message ? el('div', { class: 'msg', dir: 'auto' }, result.error.message)
+          : result.message ? el('div', { class: 'msg', dir: 'auto' }, result.message) : null,
+        details.length ? el('div', { class: 'detail mono' }, details.join('  |  ')) : null));
+      $('log-empty').hidden = true;
+    }
+
+    async function withBusy(work) {
+      busy = true;
+      renderOrders();
+      try { await work(); } finally { busy = false; renderOrders(); }
+    }
+
+    // ---------- wiring ----------
+    $('token-save').addEventListener('click', saveToken);
+    $('token-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveToken(); });
+    $('token-clear').addEventListener('click', clearToken);
+    $('token-show').addEventListener('click', () => {
+      const input = $('token-input');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      $('token-show').textContent = input.type === 'password' ? 'Show' : 'Hide';
+    });
+    $('order-form').addEventListener('submit', placeOrder);
+    $('track-submit').addEventListener('click', trackOrder);
+    ['price', 'quantity'].forEach((id) => $(id).addEventListener('input', updateTotal));
+    $('isin').addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase(); });
+    $('log-clear').addEventListener('click', () => { $('log').innerHTML = ''; $('log-empty').hidden = false; });
+
+    (function theme() {
+      const root = document.documentElement;
+      try {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'light' || saved === 'dark') root.setAttribute('data-theme', saved);
+      } catch (e) { /* storage unavailable */ }
+      $('theme-toggle').addEventListener('click', () => {
+        const current = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) { /* storage unavailable */ }
+      });
+    })();
+
+    renderOrders();
+    api('GET', '/token').then((status) => { if ('hasToken' in status) applyTokenStatus(status); else { hasToken = false; renderToken(); } });
+    setInterval(renderToken, 30000);
+  </script>
+</body>
+</html>

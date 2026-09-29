@@ -63,6 +63,21 @@ public class EasyTraderClientTests
     }
 
     [Fact]
+    public async Task Body_is_sent_with_content_length_not_chunked()
+    {
+        var handler = new RecordingHandler();
+        var client = TestClient.Create(handler);
+
+        await client.AddOrderAsync(AnyAddRequest);
+
+        var request = Assert.Single(handler.Requests);
+        Assert.Equal(System.Text.Encoding.UTF8.GetByteCount(request.Body!), request.ContentHeaders!.ContentLength);
+        Assert.Equal("application/json", request.ContentHeaders.ContentType!.MediaType);
+        Assert.Equal("utf-8", request.ContentHeaders.ContentType.CharSet);
+        Assert.NotEqual(true, request.Headers.TransferEncodingChunked);
+    }
+
+    [Fact]
     public async Task Sell_side_and_custom_order_from_are_sent()
     {
         var handler = new RecordingHandler();
@@ -132,6 +147,23 @@ public class EasyTraderClientTests
         provider.SetToken(TestJwt.Create(expiresAt));
 
         Assert.Equal(expiresAt, provider.ExpiresAt);
+    }
+
+    [Fact]
+    public async Task ClearToken_removes_the_token()
+    {
+        var handler = new RecordingHandler();
+        var tokens = new StaticTokenProvider(TestJwt.Valid());
+        var client = new EasyTraderClient(new HttpClient(handler), tokens,
+            Microsoft.Extensions.Options.Options.Create(new EasyTraderOptions()));
+        Assert.True(tokens.HasToken);
+
+        tokens.ClearToken();
+
+        Assert.False(tokens.HasToken);
+        Assert.Null(tokens.ExpiresAt);
+        await Assert.ThrowsAsync<EasyTraderAuthenticationException>(() => client.DeleteOrderAsync("id"));
+        Assert.Empty(handler.Requests);
     }
 
     [Theory]

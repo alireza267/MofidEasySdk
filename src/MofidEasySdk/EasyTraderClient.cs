@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -143,10 +142,11 @@ public sealed class EasyTraderClient : IEasyTraderClient
                 $"The access token expired at {token.ExpiresAt:u}. Copy a fresh token from d.easytrader.ir.");
         }
 
-        using var request = new HttpRequestMessage(method, uri)
-        {
-            Content = JsonContent.Create(body, options: JsonOptions),
-        };
+        // Serialize up front so the body goes out with a Content-Length, like the browser and curl
+        // requests do. JsonContent would stream it with chunked transfer encoding instead.
+        var requestBody = new ByteArrayContent(JsonSerializer.SerializeToUtf8Bytes(body, JsonOptions));
+        requestBody.Headers.ContentType = new MediaTypeHeaderValue("application/json") { CharSet = "utf-8" };
+        using var request = new HttpRequestMessage(method, uri) { Content = requestBody };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Headers.TryAddWithoutValidation(SdkVersionHeader, SdkVersion);
