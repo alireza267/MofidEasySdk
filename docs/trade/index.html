@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Lock the page down: its scripts and styles come only from this site, and it can only talk to the EasyTrader API.
+       Even injected code couldn't send the token anywhere else. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://api-mts.orbis.easytrader.ir; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>EasyTrader Orders</title>
+  <link rel="stylesheet" href="trade.css">
+</head>
+<body>
+  <div class="wrap" id="app">
+    <header class="top">
+      <h1>EasyTrader orders</h1>
+      <span class="sub">Add, edit and delete orders from your browser</span>
+      <span class="spacer"></span>
+      <a href="../">SDK docs</a>
+      <button class="link" id="theme-toggle" type="button" aria-label="Toggle dark mode">◐ Theme</button>
+    </header>
+
+    <div class="banner" role="note">
+      <span>⚠</span>
+      <div>
+        <p><strong>These are real orders on your account.</strong> Anything you place here goes to the EasyTrader matching engine and can be filled.</p>
+        <p>Your token never leaves your browser except to go to <code>api-mts.orbis.easytrader.ir</code>. It isn't saved, so reloading the page forgets it.</p>
+      </div>
+    </div>
+
+    <div class="banner" id="api-status" role="status">
+      <span>…</span><div><p>Checking whether the EasyTrader API accepts requests from this page…</p></div>
+    </div>
+
+    <div class="grid">
+      <div class="col">
+        <section class="card" aria-labelledby="token-title">
+          <div class="head"><span class="step">1</span><h2 id="token-title">Access token</h2></div>
+          <div class="body">
+            <div class="token-status"><span class="dot bad" id="token-dot"></span><span id="token-text">No token set</span></div>
+            <label for="token-input">Paste the token from d.easytrader.ir</label>
+            <div class="inline">
+              <input id="token-input" type="password" autocomplete="off" spellcheck="false" placeholder="eyJhbGciOi…">
+              <button class="small" id="token-show" type="button">Show</button>
+            </div>
+            <div class="inline gap-top">
+              <button class="primary" id="token-save" type="button">Use token</button>
+              <button id="token-clear" type="button" hidden>Forget token</button>
+            </div>
+            <p class="note">Log in to d.easytrader.ir, open DevTools (F12) → Network, click any request to <code>api-mts.orbis.easytrader.ir</code>, and copy its <code>Authorization</code> header.</p>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="order-title">
+          <div class="head"><span class="step">2</span><h2 id="order-title">New order</h2><span class="hint">Validity: Day</span></div>
+          <form class="body" id="order-form" novalidate>
+            <label for="isin">Symbol ISIN</label>
+            <input id="isin" type="text" maxlength="12" value="IRO1TBAN0001" spellcheck="false" autocomplete="off" class="mono">
+
+            <label>Side</label>
+            <div class="segmented" role="radiogroup" aria-label="Side">
+              <input type="radio" name="side" id="side-buy" value="Buy" checked><label for="side-buy">Buy</label>
+              <input type="radio" name="side" id="side-sell" value="Sell"><label for="side-sell">Sell</label>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="price">Price (Rials)</label>
+                <input id="price" type="number" min="1" step="1" inputmode="numeric" placeholder="20520">
+              </div>
+              <div>
+                <label for="quantity">Quantity</label>
+                <input id="quantity" type="number" min="1" step="1" inputmode="numeric" placeholder="100">
+              </div>
+            </div>
+            <div class="total" id="order-total">Total: –</div>
+
+            <button class="primary full" id="order-submit" type="submit">Place order</button>
+
+            <details>
+              <summary>Manage an order placed elsewhere</summary>
+              <p class="note">Add an existing order by its ID to edit or delete it here. It uses the ISIN, side, price and quantity from the form above.</p>
+              <label for="track-id">Order ID</label>
+              <input id="track-id" type="text" spellcheck="false" autocomplete="off" class="mono">
+              <button id="track-submit" type="button" class="gap-top">Add to list</button>
+            </details>
+          </form>
+        </section>
+      </div>
+
+      <div class="col">
+        <section class="card" aria-labelledby="orders-title">
+          <div class="head"><span class="step">3</span><h2 id="orders-title">Your orders</h2><span class="hint">This tab</span></div>
+          <div class="body flush">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Order ID</th><th>Symbol</th><th>Side</th><th class="num">Price</th><th class="num">Qty</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody id="orders-body"></tbody>
+              </table>
+            </div>
+            <div class="empty" id="orders-empty">No orders yet. Place one on the left.</div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="log-title">
+          <div class="head"><h2 id="log-title">Activity</h2><button class="link push" id="log-clear" type="button">Clear</button></div>
+          <div class="body flush-log">
+            <ul class="log" id="log"></ul>
+            <div class="empty" id="log-empty">Requests and responses will appear here.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <footer>
+      Built on the same API as <a href="https://github.com/alireza267/MofidEasySdk">MofidEasySdk</a>, the .NET client.
+      This page's source is <a href="https://github.com/alireza267/MofidEasySdk/tree/main/docs/trade">public</a>. Review it before pasting your token.
+    </footer>
+  </div>
+
+  <script src="trade.js"></script>
+</body>
+</html>

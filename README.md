@@ -6,6 +6,8 @@ It handles the request formats, the bearer token, token-expiry checks and error 
 
 **Docs and examples:** [alireza267.github.io/MofidEasySdk](https://alireza267.github.io/MofidEasySdk/)
 
+**Place orders online:** [alireza267.github.io/MofidEasySdk/trade](https://alireza267.github.io/MofidEasySdk/trade/). This needs the EasyTrader API to allow the site (see [Online order page](#online-order-page)).
+
 ## Get your access token
 
 1. Log in to [d.easytrader.ir](https://d.easytrader.ir).
@@ -164,6 +166,21 @@ app.Services.GetRequiredService<StaticTokenProvider>().SetToken(newToken);
 | `EasyTraderApiException` | Any other non-success status, or an unexpected response (for example an accepted add with no `id`). `StatusCode` and `ResponseContent` hold the details. | Unknown |
 
 All SDK exceptions derive from `EasyTraderException`. Cancelling through your `CancellationToken` throws `OperationCanceledException`; if you cancel after the request was sent, the order state is unknown.
+
+## Online order page
+
+[`docs/trade`](docs/trade) is a static page on GitHub Pages where anyone can paste their token and add, edit or delete orders from the browser. It follows the same rules as the SDK: the same request bodies, token expiry check, rejection details, and "unknown state" after a timeout.
+
+The browser sends requests straight from `alireza267.github.io` to `api-mts.orbis.easytrader.ir`, so the **API's CORS settings must allow it**. Today they only allow `https://d.easytrader.ir`. The API needs:
+
+```
+Access-Control-Allow-Origin:  https://alireza267.github.io   (in addition to https://d.easytrader.ir)
+Access-Control-Allow-Headers: … existing …, easy-sdk
+```
+
+Until then, the page detects the block on load, says so, and disables ordering.
+
+The page is locked down with a Content Security Policy. It loads scripts only from itself, can only connect to the EasyTrader API, keeps the token in memory, and refuses to run inside a frame.
 
 ## Web demo
 
